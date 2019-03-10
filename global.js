@@ -1,7 +1,6 @@
 /*
       Global constant
 */
-
 require('dotenv').config();
 const OAuth = require('oauth').OAuth
 

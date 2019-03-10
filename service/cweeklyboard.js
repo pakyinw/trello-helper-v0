@@ -1,8 +1,8 @@
-var helper = require('./../helper.js');
-var url = require('url');
+const helper = require('./../helper.js');
+const url = require('url');
 
 module.exports = (oauth, oauth_secrets) => {
-  var firstBoard = (year, month, week, accessToken, accessTokenSecret) => (resolve, reject) => {
+  const firstBoard = (year, month, week, accessToken, accessTokenSecret) => (resolve, reject) => {
     console.log("year: " + year)
     var boardid;  
     oauth.getProtectedResource(`https://api.trello.com/1/boards/?name=${year}%20${month}%20Week%20${week}&pos=1`, "POST", accessToken, accessTokenSecret, (error, data, response) => {
