@@ -1,9 +1,9 @@
-var global = require('./../global.js')
-const login = (request, response) => {
-    global.oauth.getOAuthRequestToken((error, token, tokenSecret, results) => {
-        global.oauth_secrets[token] = tokenSecret;
-        response.redirect(`${global.authorizeURL}?oauth_token=${token}&name=${global.appName}&scope=read,write`);
-    });
-};
-
-module.exports = login
+module.exports = (oauth, oauth_secrets, authorizeURL, appName) => {
+    const login = (request, response) => {
+        oauth.getOAuthRequestToken((error, token, tokenSecret, results) => {
+            oauth_secrets[token] = tokenSecret;
+            response.redirect(`${authorizeURL}?oauth_token=${token}&name=${appName}&scope=read,write`);
+        });
+    };
+    return login;
+}

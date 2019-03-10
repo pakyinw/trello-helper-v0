@@ -1,11 +1,11 @@
 var helper = require('./../helper.js');
-var global = require('./../global.js');
 var url = require('url');
 
-var firstBoard = (year, month, week, accessToken, accessTokenSecret) => (resolve, reject) => {
+module.exports = (oauth, oauth_secrets) => {
+  var firstBoard = (year, month, week, accessToken, accessTokenSecret) => (resolve, reject) => {
     console.log("year: " + year)
     var boardid;  
-    global.oauth.getProtectedResource(`https://api.trello.com/1/boards/?name=${year}%20${month}%20Week%20${week}&pos=1`, "POST", accessToken, accessTokenSecret, (error, data, response) => {
+    oauth.getProtectedResource(`https://api.trello.com/1/boards/?name=${year}%20${month}%20Week%20${week}&pos=1`, "POST", accessToken, accessTokenSecret, (error, data, response) => {
       const jsonObj = JSON.parse(data);
       boardid = jsonObj.id;
       if (error){
@@ -21,7 +21,7 @@ var firstBoard = (year, month, week, accessToken, accessTokenSecret) => (resolve
     const startEndDate = helper.getStartEndDate(weeks, week);
     const datesInWeek = helper.getDatesInWeek(startEndDate.start);
     return new Promise( (resolve) => {
-      global.oauth.getProtectedResource(`https://api.trello.com/1/lists?name=${helper.getYYYYMMDD(datesInWeek[0]) + " Plan"}&idBoard=${value}&pos=1`, "POST", accessToken, accessTokenSecret, (error, data, response) => {
+      oauth.getProtectedResource(`https://api.trello.com/1/lists?name=${helper.getYYYYMMDD(datesInWeek[0]) + " Plan"}&idBoard=${value}&pos=1`, "POST", accessToken, accessTokenSecret, (error, data, response) => {
         var jsonObj = JSON.parse(data);
         const listid = jsonObj.id;
         console.log("end of boardpromise.then, value[0] = " + value);
@@ -39,7 +39,7 @@ var firstBoard = (year, month, week, accessToken, accessTokenSecret) => (resolve
       (resolve) => {
         //const cardname = helper.zeroFill(cardcount,2) + '00';
         //console.log(cardname);
-        global.oauth.getProtectedResource(`https://api.trello.com/1/cards?idList=${listid}&name=0000&pos=1`, "POST", accessToken, accessTokenSecret, (error, data, response) => {
+        oauth.getProtectedResource(`https://api.trello.com/1/cards?idList=${listid}&name=0000&pos=1`, "POST", accessToken, accessTokenSecret, (error, data, response) => {
           console.log("singlecardpromise: " + data);
           resolve(value);
         });
@@ -50,7 +50,7 @@ var firstBoard = (year, month, week, accessToken, accessTokenSecret) => (resolve
       const pos = cardcount;
       singlecardpromise = singlecardpromise.then(
         (value) => new Promise((resolve) => {
-          global.oauth.getProtectedResource(`https://api.trello.com/1/cards?idList=${listid}&name=${cardname}&pos=${pos + 1}`, "POST", accessToken, accessTokenSecret, (error, data, response) => {
+          oauth.getProtectedResource(`https://api.trello.com/1/cards?idList=${listid}&name=${cardname}&pos=${pos + 1}`, "POST", accessToken, accessTokenSecret, (error, data, response) => {
             console.log("singlecardpromise: " + data);
             resolve(value);
           });
@@ -69,7 +69,7 @@ var firstBoard = (year, month, week, accessToken, accessTokenSecret) => (resolve
     console.log("copylistpromise.listid: " + value);
     var listpromise = new Promise(
       function(resolve){
-        global.oauth.getProtectedResource(`https://api.trello.com/1/lists?name=${helper.getYYYYMMDD(datesInWeek[0]) + " Done"}&idBoard=${boardid}&idListSource=${listid}&pos=2`, "POST", accessToken, accessTokenSecret, function(error, data, response){
+        oauth.getProtectedResource(`https://api.trello.com/1/lists?name=${helper.getYYYYMMDD(datesInWeek[0]) + " Done"}&idBoard=${boardid}&idListSource=${listid}&pos=2`, "POST", accessToken, accessTokenSecret, function(error, data, response){
           var jsonObj = JSON.parse(data);
           console.log(data);
           const listid = jsonObj.id;
@@ -91,7 +91,7 @@ var firstBoard = (year, month, week, accessToken, accessTokenSecret) => (resolve
           var listid = value[1];
           return new Promise(
             function(resolve){
-              global.oauth.getProtectedResource(`https://api.trello.com/1/lists?name=${helper.getYYYYMMDD(datesInWeek[cDateInWeek]) + " Plan"}&idBoard=${boardid}&idListSource=${listid}&pos=${cPos1}`, "POST", accessToken, accessTokenSecret, function(error, data, response){
+              oauth.getProtectedResource(`https://api.trello.com/1/lists?name=${helper.getYYYYMMDD(datesInWeek[cDateInWeek]) + " Plan"}&idBoard=${boardid}&idListSource=${listid}&pos=${cPos1}`, "POST", accessToken, accessTokenSecret, function(error, data, response){
                 console.log(data);
                 resolve(value);
               });
@@ -107,7 +107,7 @@ var firstBoard = (year, month, week, accessToken, accessTokenSecret) => (resolve
           var listid = value[1];
           return new Promise(
             function(resolve){
-              global.oauth.getProtectedResource(`https://api.trello.com/1/lists?name=${helper.getYYYYMMDD(datesInWeek[cDateInWeek]) + " Done"}&idBoard=${boardid}&idListSource=${listid}&pos=${cPos2}`, "POST", accessToken, accessTokenSecret, function(error, data, response){
+              oauth.getProtectedResource(`https://api.trello.com/1/lists?name=${helper.getYYYYMMDD(datesInWeek[cDateInWeek]) + " Done"}&idBoard=${boardid}&idListSource=${listid}&pos=${cPos2}`, "POST", accessToken, accessTokenSecret, function(error, data, response){
                 console.log(data);
                 resolve(value);
               });
@@ -120,9 +120,10 @@ var firstBoard = (year, month, week, accessToken, accessTokenSecret) => (resolve
   }
   
   var cweeklyboard = (req, res) =>{
+    console.log("req.url: " + req.url)
     const query = url.parse(req.url, true).query;
     const token = query.oauth_token;
-    const tokenSecret = global.oauth_secrets[token];
+    const tokenSecret = oauth_secrets[token];
     const verifier = query.oauth_verifier;
     const year = query.year;
     const month = query.month;
@@ -133,7 +134,7 @@ var firstBoard = (year, month, week, accessToken, accessTokenSecret) => (resolve
     console.log(year);
     console.log(month);
     console.log(week);
-    global.oauth.getOAuthAccessToken(token, tokenSecret, verifier, (error, accessToken, accessTokenSecret, results) => {
+    oauth.getOAuthAccessToken(token, tokenSecret, verifier, (error, accessToken, accessTokenSecret, results) => {
         console.log("start getOAuthAccessToken");
         console.log("year: " + year)
         const boardpromise = new Promise(firstBoard(year, month, week, accessToken, accessTokenSecret));
@@ -143,5 +144,7 @@ var firstBoard = (year, month, week, accessToken, accessTokenSecret) => (resolve
         res.redirect('/');
     });
   };
+
+  return cweeklyboard;
+}
   
-  module.exports = cweeklyboard

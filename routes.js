@@ -1,11 +1,11 @@
+let global = require('./global.js')
 var express = require('express');
 var router = express.Router();
 var url = require('url')
-var login = require('./service/login.js')
-var cweeklyboard = require('./service/cweeklyboard.js')
 var helper = require('./helper.js');
-var global = require('./global.js')
 
+let login = require('./service/login.js')(global.oauth, global.oauth_secrets, global.authorizeURL, global.appName)
+let cweeklyboard = require('./service/cweeklyboard.js')(global.oauth, global.oauth_secrets)
 
 /*
 /     Routes
@@ -14,6 +14,7 @@ router.get("/", (request, response) => {
     const query = url.parse(request.url, true).query;
     const oauth_token = query.oauth_token;
     const oauth_verifier = query.oauth_verifier;
+
     console.log(`GET '/' 🤠 ${Date()}`);
     var authenticated = !helper.isEmptyObject(global.oauth_secrets);
     var page = `
@@ -30,8 +31,8 @@ router.get("/", (request, response) => {
     <p>Year: <input type="text" name="year" value="2020" /></p>
     <p>Month: <input type="text" name="month" value="1" /></p>
     <p>Week: <input type="text" name="week" value="1" /></p>
-    <p><input type="hidden" name="oauth_token" value="${global.oauth_token}"></p>
-    <p><input type="hidden" name="oauth_verifier" value="${global.oauth_verifier}"></p>
+    <p><input type="hidden" name="oauth_token" value="${oauth_token}"></p>
+    <p><input type="hidden" name="oauth_verifier" value="${oauth_verifier}"></p>
     <p><input type="submit"></p>
     </form>
     <hr>
