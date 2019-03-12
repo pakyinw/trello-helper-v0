@@ -17,5 +17,7 @@ OAuth 1.0
 5. Currying
 (https://stackoverflow.com/questions/45485140/bind-only-second-argument-to-javascript-function)
 (https://stackoverflow.com/questions/27699493/javascript-partially-applied-function-how-to-bind-only-the-2nd-parameter)
+6. eliminate for-in
+(https://stackoverflow.com/questions/4261051/javascript-why-for-in-is-a-bad-practice)
 
 ## Todo

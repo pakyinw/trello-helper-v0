@@ -35,9 +35,8 @@ Open the browser.
 http://localhost:3000
 ```
 
-## Pending
-1. Develop a frontend handler.
-
+## Design
+(design/README.md)
 
 
 

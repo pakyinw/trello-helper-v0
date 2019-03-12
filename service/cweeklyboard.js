@@ -60,7 +60,7 @@ module.exports = (oauth, oauth_secrets) => {
     return singlecardpromise.then((value) => value);
   }
   
-  var copyBoard = (year, month, week, accessToken, accessTokenSecret) => (value) => {
+  var copyBoard = (year, month, week, accessToken, accessTokenSecret, res) => (value) => {
     const weeks = helper.getWeeksInMonth(month, year);
     const startEndDate = helper.getStartEndDate(weeks, week);
     const datesInWeek = helper.getDatesInWeek(startEndDate.start);
@@ -116,6 +116,8 @@ module.exports = (oauth, oauth_secrets) => {
         }
       );
       position++;
+      if (position == 14) res.send("<h1>Finished</h1>")
+
     }
   }
   
@@ -140,8 +142,7 @@ module.exports = (oauth, oauth_secrets) => {
         const boardpromise = new Promise(firstBoard(year, month, week, accessToken, accessTokenSecret));
         const firstlistpromise = boardpromise.then(firstList(year, month, week, accessToken, accessTokenSecret));
         const copylistpromise = firstlistpromise.then(copyList(accessToken, accessTokenSecret));
-        copylistpromise.then(copyBoard(year, month, week, accessToken, accessTokenSecret));
-        res.redirect('/');
+        copylistpromise.then(copyBoard(year, month, week, accessToken, accessTokenSecret, res));
     });
   };
 
